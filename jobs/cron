@@ -1,0 +1,16 @@
+const cron = require("node-cron");
+const retryFailedJobs = require("./retryFailedJobs");
+
+const startFailedJobCron = () => {
+  cron.schedule("*/30 * * * *", async () => {
+    console.log("Cron started: Retrying failed jobs");
+    try {
+      await retryFailedJobs();
+      console.log("Cron finished successfully");
+    } catch (err) {
+      console.error("Cron failed:", err.message);
+    }
+  });
+};
+
+module.exports = startFailedJobCron;
