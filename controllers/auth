@@ -1,0 +1,62 @@
+const UserModel = require('../models/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+async function login(req, res){
+    try{
+        const {email, password} = req.body;
+        const exists = await UserModel.findOne({
+            email,
+            isDeleted: false
+        });
+        if(!exists){
+            return res.status(403).json({msg: "Account inactive or deleted"});
+        }
+        const isSame = await bcrypt.compare(password, exists.password);
+        if(!isSame){
+            return res.status(401).json({msg: "Invalid password"});
+        }
+        exists.lastActiveAt = new Date();
+        await exists.save();
+
+        const token = jwt.sign(
+            {id: exists._id, role: exists.role},
+            process.env.JWT_SECRET,
+            {expiresIn: "5h"}
+        );
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 5*60*60*1000
+        });
+        return res.redirect('/home');
+    } catch(error){
+        console.log("error:", error);
+        return res.status(500).json({msg: "Login error"});
+    }
+}
+
+async function signup(req, res){
+    try{
+        const {username, email, password} = req.body;
+        const exist = await UserModel.findOne({
+            $or: [{email}, {username}]
+        });
+        if(exist){
+            return res.status(400).json({msg: "User already exists"});
+        }
+        const hashpw = await bcrypt.hash(password, 10);
+        const newUser = new UserModel({
+            username: username,
+            email: email,
+            password: hashpw
+        });
+        await newUser.save();
+        return res.redirect('/login');
+    } catch(error){
+        console.log("error:",error);
+        return res.status(500).json({msg: "Signup error"});
+    }
+}
+
+module.exports = {signup, login};
