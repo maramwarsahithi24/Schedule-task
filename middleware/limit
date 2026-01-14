@@ -1,0 +1,40 @@
+const RateLimit = require('../models/rateLimit');
+const WINDOW_DURATION = 60*1000;
+const MAX_REQUESTS = 5;
+
+async function rateLimiter(req, res, next) {
+    console.log("rateLimit middleware HIT");
+    try{
+        const userId = req.user.id;
+        let usage = await RateLimit.findOne({ userId });
+        if(!usage){
+            usage = await RateLimit.create({
+                userId,
+                windowStart: new Date(),
+                requestCount: 1
+            });
+        } else{
+            const now = Date.now();
+            const windowStartTime = new Date(usage.windowStart).getTime();
+
+            if(now - windowStartTime > WINDOW_DURATION){
+                console.log("Rate limit window reset");
+                usage.windowStart = new Date();
+                usage.requestCount = 1;
+            } else{
+                usage.requestCount += 1;
+            }
+            await usage.save();
+        }
+        if(usage.requestCount > MAX_REQUESTS){
+            return res.status(429).json({ msg: "Too many requests. Please try again later."});
+        }
+        req.rateLimit = usage;
+        next();
+    } catch(error){
+        console.log("Rate limiter error:", error);
+        res.status(500).json({ msg: "Rate limit check failed"});
+    }
+}
+
+module.exports = rateLimiter;
