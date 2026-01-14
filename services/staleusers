@@ -1,0 +1,57 @@
+const UserModel = require('../models/user');
+const AuditLog = require('../models/logs');
+
+const INACTIVE_DAYS = 1;
+
+function getCutoffDate(){
+    const date = new Date();
+    date.setDate(date.getDate() - INACTIVE_DAYS);
+    return date;
+}
+
+async function previewStaleUsers() {
+  const cutoff = getCutoffDate();
+
+  const users = await UserModel.find(
+    {
+      lastActiveAt: { $lt: cutoff },
+      isDeleted: false
+    },
+    { username: 1, email: 1, lastActiveAt: 1 }
+  );
+
+  return users.map(user => ({
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    inactiveDays: Math.floor(
+      (Date.now() - new Date(user.lastActiveAt)) / (1000 * 60 * 60 * 24)
+    )
+  }));
+}
+
+async function softDeleteStaleUsers(performedBy=null) {
+    const cutoffDate = getCutoffDate();
+    const result = await UserModel.updateMany({
+        lastActiveAt: { $lt: cutoffDate },
+        isDeleted: false
+    },
+    {
+        $set: { isDeleted: true }
+    }
+);
+if (performedBy) {
+    await AuditLog.create({
+      userId: performedBy,
+      action: "SOFT_DELETE_STALE_USERS",
+      resource: "User",
+      metadata: {
+        affectedUsers: result.modifiedCount,
+        trigger: "MANUAL"
+      }
+    });
+  }
+  return result.modifiedCount;
+}
+
+module.exports = {previewStaleUsers, softDeleteStaleUsers};
