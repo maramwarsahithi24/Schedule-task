@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task Scheduler – Dashboard</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+body{
+  background:#eeeeee;
+  margin:0;
+  padding:40px;
+}
+
+/* HEADER CARD */
+.header-card{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto 30px auto;
+  background:white;
+  border-radius:20px;
+  display:flex;
+  overflow:hidden;
+  box-shadow:
+    0 28px 55px rgba(0,0,0,0.2),
+    0 12px 18px rgba(0,0,0,0.15);
+}
+
+.header-left{
+  width:35%;
+  background:linear-gradient(180deg,#e6b800,#ffd24d);
+  padding:40px;
+  color:white;
+}
+
+.logo{
+  width:90px;
+  height:90px;
+  background:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#e6b800;
+  font-size:42px;
+  margin-bottom:20px;
+}
+
+.header-right{
+  width:65%;
+  padding:45px;
+}
+
+.features{
+  max-width:1100px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:25px;
+}
+
+.feature-card{
+  background:white;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 18px 35px rgba(0,0,0,0.15);
+  cursor:pointer;
+}
+
+.footer{
+  text-align:center;
+  margin-top:40px;
+  font-size:14px;
+  color:#555;
+}
+
+/* ================= MODALS ================= */
+.modal{
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+}
+
+.modal-content {
+  background: white;
+  max-width: 800px;
+  width: 90%;
+  margin: 80px auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+th {
+  background: #f2f2f2;
+}
+
+th:nth-child(3), td:nth-child(3) {
+  width: 40%;
+}
+
+td:nth-child(3) {
+  white-space: normal;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #e6b800;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.secondary-btn{
+  background:#ccc;
+  margin-right: 0;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 15px;
+    max-width: 95%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header-card">
+  <div class="header-left">
+    <div class="logo">⏱</div>
+    <h2>TASK SCHEDULER</h2>
+    <p>Backend Automation & Reliability Platform</p>
+  </div>
+
+  <div class="header-right">
+    <h2>System Overview</h2>
+    <p>
+      Backend system demonstrating cron jobs, admin workflows,
+      safe data cleanup, scalability, and error handling.
+    </p>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features">
+
+  <div class="feature-card" onclick="openDataManagement()">
+    <h3>🗑 Data Management</h3>
+    <p>Detect inactive users and soft delete safely</p>
+  </div>
+
+  <div class="feature-card" onclick="openScalability()">
+    <h3>📊 Scalability</h3>
+    <p>Aggregated API usage per user</p>
+  </div>
+
+  <div class="feature-card" onclick="openHealthCheck()">
+    <h3>🚑 Health Check</h3>
+    <p>Run system health check and view summary</p>
+  </div>
+
+  <div class="feature-card" onclick="openErrorHandling()">
+    <h3>🚨 Error Handling</h3>
+    <p>Centralized failure handling and alerts</p>
+  </div>
+
+</div>
+
+<div class="footer">
+  Designed & implemented as a backend-focused project
+</div>
+
+<!-- ================= DATA MANAGEMENT MODAL ================= -->
+<div id="dataModal" class="modal">
+  <div class="modal-content">
+    <h2>🗑 Delete Stale Users</h2>
+
+    <button onclick="scanStaleUsers()">Scan Users</button>
+    <p id="scanStatus"></p>
+    <ul id="userList"></ul>
+
+    <button id="deleteBtn" onclick="runSoftDelete()" style="display:none">
+      Confirm Soft Delete
+    </button>
+    <br><br>
+    <button class="secondary-btn" onclick="closeDataManagement()">Close</button>
+  </div>
+</div>
+
+<!-- ================= SCALABILITY MODAL ================= -->
+<div id="scalabilityModal" class="modal">
+  <div class="modal-content">
+    <h2>📊 API Usage – Scalability</h2>
+
+    <div id="scalabilitySummary"></div>
+    <div id="scalabilityResult"></div>
+
+    <button class="secondary-btn" onclick="closeScalability()">Close</button>
+  </div>
+</div>
+
+<!-- ================= HEALTH CHECK MODAL ================= -->
+<div id="healthModal" class="modal">
+  <div class="modal-content">
+    <h2>🚑 System Health Check</h2>
+
+    <button onclick="triggerHealthCheck()">Run Health Check</button>
+    <div id="healthResult" style="margin-top:15px; white-space: pre-wrap;"></div>
+
+    <button class="secondary-btn" onclick="closeHealthCheck()">Close</button>
+  </div>
+</div>
+
+<!-- ================= ERROR HANDLING MODAL ================= -->
+<div id="errorModal" class="modal">
+  <div class="modal-content">
+    <h2>🚨 Failed Jobs</h2>
+
+    <button onclick="loadFailedJobs()">Load Failed Jobs</button>
+    <button onclick="retryFailedJobs()">Retry Pending Jobs</button>
+    <div id="errorResult" style="margin-top:15px;"></div>
+
+    <button class="secondary-btn" onclick="closeErrorHandling()">Close</button>
+  </div>
+</div>
+
+<script>
+const userRole = "<%= role %>";
+
+/* ---------------- DATA MANAGEMENT ---------------- */
+function openDataManagement(){ document.getElementById("dataModal").style.display = "block"; }
+function closeDataManagement(){ document.getElementById("dataModal").style.display = "none"; }
+
+async function scanStaleUsers(){
+  const res = await fetch("/admin/staleusers/preview");
+  const data = await res.json();
+  document.getElementById("scanStatus").innerText =
+    `Inactive users found: ${data.totalStaleUsers}`;
+
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+  data.users.forEach(u => {
+    const li = document.createElement("li");
+    li.innerText = `${u.username} — inactive for ${u.inactiveDays} days`;
+    list.appendChild(li);
+  });
+
+  document.getElementById("deleteBtn").style.display =
+    data.totalStaleUsers > 0 ? "inline-block" : "none";
+}
+
+async function runSoftDelete(){
+  const res = await fetch("/admin/staleusers/softdelete", { method:"PATCH" });
+  const data = await res.json();
+  document.getElementById("scanStatus").innerText =
+    `${data.msg} (Affected: ${data.affectedUsers})`;
+}
+
+/* ---------------- SCALABILITY ---------------- */
+function openScalability(){ document.getElementById("scalabilityModal").style.display = "block"; loadScalabilityData(); }
+function closeScalability(){ document.getElementById("scalabilityModal").style.display = "none"; }
+
+async function loadScalabilityData(){
+  let url = userRole === "admin" ? "/ratelimit/admin/scalability" : "/ratelimit/my-scalability";
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const start = data.windowStart ? new Date(data.windowStart).toLocaleString() : "Not started";
+  document.getElementById("scalabilitySummary").innerHTML = `<b>Window Start:</b> ${start}<br><b>Max Requests:</b> ${data.maxRequests}`;
+
+  if(data.users.length === 0){
+    document.getElementById("scalabilityResult").innerText = "No usage data available";
+    return;
+  }
+
+  let table = `<table><tr><th>Username</th><th>Requests Used</th><th>Remaining</th></tr>`;
+  data.users.forEach(u => {
+    table += `<tr><td>${u.username}</td><td>${u.requestsUsed}</td><td>${u.remaining}</td></tr>`;
+  });
+  table += "</table>";
+  document.getElementById("scalabilityResult").innerHTML = table;
+}
+
+/* ---------------- HEALTH CHECK ---------------- */
+function openHealthCheck(){ document.getElementById("healthModal").style.display = "block"; }
+function closeHealthCheck(){ document.getElementById("healthModal").style.display = "none"; }
+
+async function triggerHealthCheck(){
+  const container = document.getElementById("healthResult");
+  container.innerText = "Running health check...";
+
+  try {
+    const res = await fetch("/api/health-check/trigger", { method: "POST" });
+
+    if (!res.ok) {
+      throw new Error(`Server responded with status ${res.status}`);
+    }
+
+    const data = await res.json();
+    container.innerText = data.result || data.message || "Health check completed";
+  } catch(err) {
+    container.innerText = "Error: " + err.message;
+  }
+}
+
+/* ---------------- ERROR HANDLING ---------------- */
+function openErrorHandling(){ document.getElementById("errorModal").style.display = "block"; }
+function closeErrorHandling(){ document.getElementById("errorModal").style.display = "none"; }
+
+async function loadFailedJobs(){
+  const res = await fetch("/api/failed-jobs");
+  const jobs = await res.json();
+  const container = document.getElementById("errorResult");
+  container.innerHTML = "";
+
+  if(jobs.length === 0){ container.innerText = "No failed jobs found"; return; }
+
+  let table = `<table>
+    <tr><th>Job ID</th><th>Type</th><th>Payload</th><th>Status</th><th>Attempts</th><th>Last Error</th></tr>`;
+  jobs.forEach(job => {
+    table += `<tr>
+      <td>${job._id}</td>
+      <td>${job.type}</td>
+      <td>${JSON.stringify(job.payload)}</td>
+      <td>${job.status}</td>
+      <td>${job.attempts}</td>
+      <td>${job.lastError || "-"}</td>
+    </tr>`;
+  });
+  table += "</table>";
+  container.innerHTML = table;
+}
+
+async function retryFailedJobs(){
+  const res = await fetch("/api/failed-jobs/retry", { method: "POST" });
+  const data = await res.json();
+  alert(data.message);
+  loadFailedJobs(); 
+}
+</script>
+
+</body>
+</html>
