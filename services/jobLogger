@@ -1,0 +1,11 @@
+const CronJobLog = require("../models/cronJobLog");
+
+async function logJob(jobName, status, details) {
+  await CronJobLog.create({
+    jobName,
+    status,
+    details
+  });
+}
+
+module.exports = { logJob };
