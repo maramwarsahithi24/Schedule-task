@@ -1,0 +1,14 @@
+const cron = require('node-cron');
+const {softDeleteStaleUsers} = require('../services/staleusers');
+
+async function runStaleUserJob(){
+    console.log("Running stale user cleanup job");
+    try{
+        const count = await softDeleteStaleUsers();
+        console.log(`Soft-deleted ${count} stale users`);
+    } catch(error){
+        console.log("Error at stale user cleanup job:",error);
+    }
+}
+
+cron.schedule("0 0 * * *",runStaleUserJob);
