@@ -1,0 +1,43 @@
+const FailedJob = require("../models/failedJob");
+
+const MAX_RETRIES = 3;
+
+const executeJob = async (job) => {
+  if (job.type === "sendEmail") {
+    console.log(`Sending email to: ${job.payload.to}`);
+    
+    if (Math.random() < 0.5) {
+      throw new Error("Simulated email failure");
+    }
+    return true;
+  }
+  throw new Error("Unknown job type");
+};
+
+const retryFailedJobs = async () => {
+  const pendingJobs = await FailedJob.find({ 
+    status: "pending", 
+    attempts: { $lt: MAX_RETRIES } 
+  });
+  console.log(`Retrying ${pendingJobs.length} pending jobs..`);
+
+  for (const job of pendingJobs) {
+    try {
+      await executeJob(job); 
+      job.status = "resolved"; 
+      console.log(`Job ${job._id} succeeded`);
+    } catch (err) {
+      job.attempts += 1;
+      job.lastError = err.message;
+      console.log(`Job ${job._id} failed: ${err.message}`);
+
+      if (job.attempts >= MAX_RETRIES) {
+        job.status = "dead";
+        console.log(`Job ${job._id} marked as dead`);
+      }
+    }
+    await job.save(); 
+  }
+};
+
+module.exports = retryFailedJobs;
