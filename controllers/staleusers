@@ -1,0 +1,26 @@
+const { previewStaleUsers,softDeleteStaleUsers } = require("../services/staleusers");
+
+async function preview(req, res) {
+  const users = await previewStaleUsers();
+  res.json({
+    totalStaleUsers: users.length,
+    users
+  });
+}
+
+async function manualSoftDelete(req, res) {
+  try {
+    const count = await softDeleteStaleUsers(req.user.id);
+    return res.status(200).json({
+      msg: "Stale users soft-deleted successfully",
+      affectedUsers: count
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Soft delete failed",
+      error: error.message
+    });
+  }
+}
+
+module.exports = { preview,manualSoftDelete };
