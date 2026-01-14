@@ -1,0 +1,22 @@
+const cron = require("node-cron");
+const { runHealthCheck } = require("../services/healthCheck");
+const { logJob } = require("../services/jobLogger");
+
+async function healthCheckTask() {
+  console.log("Cron started: Health Check");
+
+  try {
+    const result = await runHealthCheck();
+    await logJob("health-check", "success", result);
+    console.log("Health check completed");
+  } catch (error) {
+    await logJob("health-check", "failure", error.message);
+    console.error("Health check failed:", error.message);
+  }
+}
+
+function startHealthCheckCron() {
+  cron.schedule("0 0 * * *", healthCheckTask);
+}
+
+module.exports = { startHealthCheckCron, healthCheckTask };
