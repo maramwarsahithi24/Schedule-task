@@ -1,0 +1,20 @@
+const UserModel = require("../models/user");
+
+async function requireAdmin(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(401).json({ msg: "User not found" });
+    }
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ msg: "Access denied. Admins only." });
+    }
+    next();
+  } catch (error) {
+    console.error("Admin middleware error:", error);
+    return res.status(500).json({ msg: "Server error" });
+  }
+}
+
+module.exports = requireAdmin;
