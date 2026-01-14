@@ -1,0 +1,15 @@
+const FailedJob = require("../models/failedJob");
+const retryFailedJobs = require("../jobs/retryFailedJobs");
+
+class FailedJobService {
+  async getAllJobs() {
+    return await FailedJob.find().sort({ createdAt: -1 });
+  }
+
+  async retryJobs() {
+    await retryFailedJobs();
+    return { message: "Retry executed successfully" };
+  }
+}
+
+module.exports = new FailedJobService();
