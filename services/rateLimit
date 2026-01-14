@@ -1,0 +1,28 @@
+const RateLimit = require('../models/rateLimit');
+const MAX_REQUESTS = 5;
+
+async function getAggregatedUsage(){
+    const usageDocs = await RateLimit.find()
+    .populate("userId", "username")
+    .sort({ requestCount: -1 });
+    if(usageDocs.length === 0){
+        return{
+            windowStart: null,
+            maxRequests: MAX_REQUESTS,
+            users: []
+        };
+    }
+    const windowStart = usageDocs[0].windowStart;
+    const users = usageDocs.map(user => ({
+        username: user.userId?.username || "Unknown",
+        requestsUsed: user.requestCount,
+        remaining: Math.max(0, MAX_REQUESTS - user.requestCount)
+    }));
+    return{
+        windowStart,
+        maxRequests: MAX_REQUESTS,
+        users
+    };
+}
+
+module.exports = {getAggregatedUsage};
