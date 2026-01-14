@@ -1,0 +1,22 @@
+const mongoose = require('mongoose');
+
+const cronJobLogSchema = new mongoose.Schema({
+    jobName: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ["success", "failure"],
+        required: true
+    },
+    details: {
+        type: String
+    },
+    executedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model("CronJobLog",cronJobLogSchema);
