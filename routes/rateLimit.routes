@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+
+const requireAuth = require('../middleware/auth');
+const requireAdmin = require('../middleware/admin');
+const { getScalabilityReport, getMyScalabilityUsage } = require('../controllers/rateLimit');
+
+router.get('/admin/scalability', requireAuth, requireAdmin, getScalabilityReport);
+router.get('/my-scalability', requireAuth, getMyScalabilityUsage);
+
+module.exports = router;
