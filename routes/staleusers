@@ -1,0 +1,12 @@
+const express = require('express');
+const router = express.Router();
+
+const { preview,manualSoftDelete } = require('../controllers/staleusers');
+const requireAuth = require('../middleware/auth');
+const requireAdmin = require('../middleware/admin');
+const rateLimiter = require('../middleware/limit');
+
+router.get('/preview',requireAuth,requireAdmin,rateLimiter,preview);
+router.patch('/softdelete',requireAuth,requireAdmin,manualSoftDelete);
+
+module.exports = router;
