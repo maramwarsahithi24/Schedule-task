@@ -1,0 +1,31 @@
+const mongoose = require("mongoose");
+
+const FailedJobSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        required: true
+    },
+    payload: {
+        type: Object, 
+        required: true
+    },
+    attempts: {
+        type: Number, 
+        default: 0
+    },
+    lastError: {
+        type: String, 
+        default: null
+    },
+    status: {
+        type: String, 
+        enum: ["pending", "resolved", "dead"], 
+        default: "pending" 
+    },
+    createdAt: {
+        type: Date, 
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model("FailedJob", FailedJobSchema);
