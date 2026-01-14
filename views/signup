@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task Scheduler – Signup</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+body{
+  background:#eeeeee;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+.card{
+  width:900px;
+  height:500px;
+  background:#ffffff;
+  border-radius:20px;
+  display:flex;
+  overflow:hidden;
+  box-shadow:
+    0 28px 55px rgba(0,0,0,0.2),
+    0 12px 18px rgba(0,0,0,0.15);
+}
+
+/* LEFT PANEL */
+.left{
+  width:50%;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.3), transparent 40%),
+    linear-gradient(180deg,#e6b800,#ffd24d);
+  padding:50px;
+  color:white;
+  position:relative;
+  box-shadow:inset 0 0 70px rgba(255,255,255,0.3);
+}
+
+.left::before{
+  content:"✦ ✧ ✦";
+  position:absolute;
+  top:35px;
+  left:55px;
+  font-size:24px;
+}
+
+.left::after{
+  content:"";
+  position:absolute;
+  bottom:-50px;
+  left:-30px;
+  width:130%;
+  height:220px;
+  background:rgba(255,255,255,0.28);
+  border-radius:50%;
+}
+
+.logo{
+  width:125px;
+  height:125px;
+  background:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#e6b800;
+  font-size:52px;
+}
+
+.left h2{
+  margin-top:85px;
+  font-size:32px;
+  font-weight:800;
+}
+
+.left p{
+  margin-top:12px;
+  font-size:16px;
+  font-weight:600;
+}
+
+/* RIGHT PANEL */
+.right{
+  width:50%;
+  padding:55px;
+}
+
+.right h2{
+  color:#1f1f1f;
+  font-size:26px;
+  font-weight:700;
+}
+
+.right p{
+  color:#4a4a4a;
+  font-size:15px;
+  font-weight:600;
+  margin-bottom:30px;
+}
+
+.input-group{
+  margin-bottom:18px;
+}
+
+.input-group input{
+  width:100%;
+  border:none;
+  border-bottom:2px solid #c9c9c9;
+  padding:12px 6px;
+  outline:none;
+  font-size:16px;
+  color:#111;
+  font-weight:600;
+}
+
+.input-group input::placeholder{
+  color:#6b6b6b;
+}
+
+.btn{
+  background:#e6b800;
+  border:none;
+  padding:14px;
+  width:180px;
+  border-radius:28px;
+  color:#ffffff;
+  font-weight:700;
+  letter-spacing:0.8px;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.register{
+  margin-top:18px;
+  font-size:14px;
+  color:#3d3d3d;
+  font-weight:600;
+}
+
+.register a{
+  color:#e6b800;
+  font-weight:700;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="left">
+    <div class="logo">⏱</div>
+    <h2>TASK SCHEDULER</h2>
+    <p>Create your scheduler account</p>
+  </div>
+
+  <div class="right">
+    <h2>Create Account</h2>
+    <p>Register to access your dashboard</p>
+
+    <form action="/authorization/signup" method="POST">
+
+      <div class="input-group">
+        <input type="text" name="username" placeholder="Username" required>
+      </div>
+
+      <div class="input-group">
+        <input type="email" name="email" placeholder="Email" required>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+
+      <button type="submit" class="btn">REGISTER</button>
+    </form>
+
+    <div class="register">
+      Already have an account?
+      <a href="/login">LOG IN</a>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
