@@ -1,0 +1,8 @@
+const express = require("express");
+const router = express.Router();
+const { triggerHealthCheck, getHealthCheckLogs } = require('../controllers/healthCheck');
+
+router.post("/trigger",triggerHealthCheck);
+router.get("/logs", getHealthCheckLogs);
+
+module.exports = router;
