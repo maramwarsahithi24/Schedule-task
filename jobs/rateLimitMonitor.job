@@ -1,0 +1,8 @@
+const { getAggregatedUsage } = require("../services/rateLimit.service");
+
+async function monitorRateLimitUsage() {
+  const data = await getAggregatedUsage();
+  console.log("Scalability Snapshot:", data);
+}
+
+module.exports = { monitorRateLimitUsage };
