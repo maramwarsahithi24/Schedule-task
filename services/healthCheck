@@ -1,0 +1,26 @@
+const os = require("os");
+const mongoose = require('mongoose');
+const CronJobLog = require('../models/cronJobLog');
+const FailedJob = require('../models/failedJob');
+
+async function runHealthCheck(){
+    try{
+        const cpuLoad = os.loadavg()[0];
+        const totalMemory = os.totalmem();
+        const freeMemory = os.freemem();
+        const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+        const failedJobsCount = await FailedJob.countDocuments({
+            status: "failed"
+        });
+        const summary = `CPU load: ${cpuLoad}
+           Total Memory: ${totalMemory}
+           Free Memory: ${freeMemory}
+           DB Status: ${dbStatus}
+           Failed Jobs: ${failedJobsCount}`;
+        return summary;
+    } catch(error){
+        throw error;
+    }
+}
+
+module.exports = { runHealthCheck };
