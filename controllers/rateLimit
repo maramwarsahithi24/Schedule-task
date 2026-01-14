@@ -1,0 +1,49 @@
+const RateLimit = require('../models/rateLimit');
+const MAX_REQUESTS = 5;
+const { getAggregatedUsage } = require('../services/rateLimit');
+
+async function getScalabilityReport(req, res){
+    try{
+        const data = await getAggregatedUsage();
+        return res.json(data);
+    } catch(error){
+        return res.status(500).json({msg:"Failed to get scalability report"});
+    }
+}
+
+async function getMyScalabilityUsage(req, res) {
+  try {
+    console.log("USER SCALABILITY HIT", req.user);
+    const userId = req.user.id;
+
+    const usage = await RateLimit.findOne({ userId })
+    .populate("userId", "username");
+
+    if (!usage) {
+      return res.json({
+        windowStart: null,
+        maxRequests: MAX_REQUESTS,
+        users: []
+      });
+    }
+
+    return res.json({
+      windowStart: usage.windowStart,
+      maxRequests: MAX_REQUESTS,
+      users: [
+        {
+          username: usage.userId.username,
+          requestsUsed: usage.requestCount,
+          remaining: Math.max(0, MAX_REQUESTS - usage.requestCount)
+        }
+      ]
+    });
+    
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Failed to fetch user scalability data"
+    });
+  }
+}
+
+module.exports = { getScalabilityReport, getMyScalabilityUsage };
