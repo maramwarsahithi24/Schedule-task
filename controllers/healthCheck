@@ -1,0 +1,35 @@
+const { healthCheckTask } = require("../jobs/healthCheck.job");
+const CronJobLog = require("../models/cronJobLog");
+
+async function triggerHealthCheck(req, res) {
+  try {
+    const result = await healthCheckTask();
+    let summaryText = "";
+    if (typeof result === "string") {
+      summaryText = result;
+    } else {
+      summaryText = JSON.stringify(result, null, 2);
+    }
+    return res.status(200).json({ message: "Health check triggered successfully", result: summaryText });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+
+async function getHealthCheckLogs(req, res) {
+  try{
+    const logs = await CronJobLog.find({ jobName: "health-check" })
+    .sort({ executedAt: -1 })
+    .limit(10);
+
+  return res.status(200).json(logs);
+  } catch(error){
+    res.status(500).json({ message: "Failed to fetch logs", error: error.message });
+  }
+}
+
+module.exports = {
+  triggerHealthCheck,
+  getHealthCheckLogs
+};
